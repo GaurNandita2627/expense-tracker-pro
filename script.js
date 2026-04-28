@@ -4,7 +4,7 @@ window.onload = function () {
     renderExpenses();
 };
 
-// ADD EXPENSE
+// ➕ ADD EXPENSE
 function addExpense() {
     let desc = document.getElementById("desc").value.trim();
     let amount = Number(document.getElementById("amount").value);
@@ -30,19 +30,19 @@ function addExpense() {
     document.getElementById("amount").value = "";
 }
 
-// DELETE EXPENSE
+// ❌ DELETE
 function deleteExpense(id) {
     expenses = expenses.filter(e => e.id !== id);
     saveData();
     renderExpenses();
 }
 
-// SAVE DATA
+// 💾 SAVE
 function saveData() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
 }
 
-// RENDER UI
+// 📊 RENDER
 function renderExpenses() {
     let list = document.getElementById("list");
     let totalEl = document.getElementById("total");
@@ -76,9 +76,7 @@ function renderExpenses() {
 function updateChart(data) {
     const ctx = document.getElementById("expenseChart").getContext("2d");
 
-    if (window.myChart) {
-        window.myChart.destroy();
-    }
+    if (window.myChart) window.myChart.destroy();
 
     window.myChart = new Chart(ctx, {
         type: "pie",
@@ -94,4 +92,29 @@ function updateChart(data) {
 // 🌙 DARK MODE
 function toggleDarkMode() {
     document.body.classList.toggle("dark");
+}
+
+// 📸 OCR SCANNER
+function scanImage() {
+    let file = document.getElementById("imageInput").files[0];
+
+    if (!file) {
+        alert("Select image first");
+        return;
+    }
+
+    Tesseract.recognize(file, 'eng')
+    .then(({ data: { text } }) => {
+
+        alert("Detected Text:\n" + text);
+
+        let numbers = text.match(/\d+/g);
+
+        if (numbers) {
+            let amount = Number(numbers[numbers.length - 1]);
+
+            document.getElementById("amount").value = amount;
+            document.getElementById("desc").value = "Scanned Expense";
+        }
+    });
 }
