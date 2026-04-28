@@ -4,7 +4,7 @@ window.onload = function () {
     renderExpenses();
 };
 
-// ➕ ADD EXPENSE
+// ➕ ADD MANUAL EXPENSE
 function addExpense() {
     let desc = document.getElementById("desc").value.trim();
     let amount = Number(document.getElementById("amount").value);
@@ -42,7 +42,7 @@ function saveData() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
 }
 
-// 📊 RENDER
+// 📊 RENDER ALL + GROUP TOTALS
 function renderExpenses() {
     let list = document.getElementById("list");
     let totalEl = document.getElementById("total");
@@ -94,12 +94,15 @@ function toggleDarkMode() {
     document.body.classList.toggle("dark");
 }
 
-// 📸 OCR SCANNER
+/* =========================
+   📸 OCR SMART PARSER (NEW)
+========================= */
+
 function scanImage() {
     let file = document.getElementById("imageInput").files[0];
 
     if (!file) {
-        alert("Select image first");
+        alert("Please select image");
         return;
     }
 
@@ -108,13 +111,63 @@ function scanImage() {
 
         alert("Detected Text:\n" + text);
 
-        let numbers = text.match(/\d+/g);
-
-        if (numbers) {
-            let amount = Number(numbers[numbers.length - 1]);
-
-            document.getElementById("amount").value = amount;
-            document.getElementById("desc").value = "Scanned Expense";
-        }
+        processOCRText(text);
     });
+}
+
+// 🧠 SMART PARSING LOGIC
+function processOCRText(text) {
+
+    let lines = text.split("\n");
+
+    let grouped = {}; // name -> total
+    let grandTotal = 0;
+
+    lines.forEach(line => {
+
+        // extract numbers
+        let numbers = line.match(/\d+/g);
+
+        if (!numbers) return;
+
+        let amount = Number(numbers[numbers.length - 1]);
+
+        // extract name (remove numbers)
+        let name = line.replace(/\d+/g, "").trim();
+
+        if (!name) name = "Unknown";
+
+        // group totals
+        grouped[name] = (grouped[name] || 0) + amount;
+
+        grandTotal += amount;
+
+        // also add to main expense list
+        expenses.push({
+            id: Date.now() + Math.random(),
+            desc: name + " (OCR)",
+            amount: amount,
+            category: "OCR",
+            date: new Date().toLocaleString()
+        });
+    });
+
+    saveData();
+    renderExpenses();
+
+    showOCRSummary(grouped, grandTotal);
+}
+
+// 📊 SHOW SUMMARY
+function showOCRSummary(grouped, total) {
+
+    let summary = "\n📊 OCR SUMMARY:\n\n";
+
+    for (let key in grouped) {
+        summary += `${key} = ₹${grouped[key]}\n`;
+    }
+
+    summary += `\nTOTAL = ₹${total}`;
+
+    alert(summary);
 }
