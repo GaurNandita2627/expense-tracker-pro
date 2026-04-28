@@ -1,29 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker Pro</title>
-
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
 <div class="container">
 
-    <h1>💰 Expense Tracker Pro</h1>
+    <h1>💰 Expense Dashboard</h1>
 
-    <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
-
-    <div class="form">
-        <input type="text" id="desc" placeholder="Expense Description">
-        <input type="number" id="amount" placeholder="Amount">
+    <div class="card">
+        <input id="desc" placeholder="Expense name">
+        <input id="amount" type="number" placeholder="Amount">
 
         <select id="category">
-            <option value="Food">Food</option>
-            <option value="Travel">Travel</option>
-            <option value="Study">Study</option>
-            <option value="Misc">Misc</option>
+            <option>Food 🍔</option>
+            <option>Travel 🚗</option>
+            <option>Study 📚</option>
         </select>
 
         <button onclick="addExpense()">Add Expense</button>
@@ -31,12 +27,15 @@
 
     <h2>Total: ₹<span id="total">0</span></h2>
 
+    <div class="card">
+        <canvas id="chart"></canvas>
+    </div>
+
     <ul id="list"></ul>
 
 </div>
 
-<!-- IMPORTANT FIX -->
-<script src="./script.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
