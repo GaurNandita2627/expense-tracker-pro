@@ -1,8 +1,8 @@
 body {
     font-family: Arial;
     background: linear-gradient(120deg, #74ebd5, #acb6e5);
-    text-align: center;
     margin: 0;
+    text-align: center;
 }
 
 .container {
@@ -14,7 +14,7 @@ body {
 .card {
     background: white;
     padding: 15px;
-    margin: 10px;
+    margin: 10px 0;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
@@ -22,15 +22,15 @@ body {
 input, select {
     width: 90%;
     padding: 10px;
-    margin: 5px;
+    margin: 5px 0;
 }
 
 button {
+    padding: 10px;
+    width: 95%;
     background: #007bff;
     color: white;
-    padding: 10px;
     border: none;
-    width: 95%;
     border-radius: 8px;
 }
 
@@ -41,7 +41,18 @@ ul {
 
 li {
     background: white;
-    margin: 5px;
+    margin: 8px 0;
     padding: 10px;
     border-radius: 8px;
+}
+
+/* DARK MODE */
+.dark {
+    background: #111;
+    color: white;
+}
+
+.dark .card {
+    background: #222;
+    color: white;
 }
