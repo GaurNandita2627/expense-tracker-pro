@@ -1,19 +1,22 @@
 body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding: 0;
+    font-family: Arial;
+    background: linear-gradient(120deg, #74ebd5, #acb6e5);
     text-align: center;
+    margin: 0;
 }
 
 .container {
     width: 90%;
     max-width: 500px;
-    margin: 40px auto;
+    margin: 30px auto;
+}
+
+.card {
     background: white;
-    padding: 20px;
+    padding: 15px;
+    margin: 10px;
     border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 input, select {
@@ -23,12 +26,12 @@ input, select {
 }
 
 button {
-    padding: 10px;
-    margin-top: 10px;
     background: #007bff;
     color: white;
+    padding: 10px;
     border: none;
-    cursor: pointer;
+    width: 95%;
+    border-radius: 8px;
 }
 
 ul {
@@ -37,17 +40,8 @@ ul {
 }
 
 li {
-    background: #eee;
+    background: white;
     margin: 5px;
     padding: 10px;
-}
-
-/* DARK MODE */
-.dark {
-    background: #111;
-    color: white;
-}
-
-.dark .container {
-    background: #222;
+    border-radius: 8px;
 }
