@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker Pro</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker Pro</title>
 
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- OCR Library -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 
 <body>
@@ -19,7 +22,10 @@
 
     <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
 
+    <!-- MANUAL ENTRY -->
     <div class="card">
+        <h3>Add Expense</h3>
+
         <input id="desc" placeholder="Expense name">
         <input id="amount" type="number" placeholder="Amount">
 
@@ -31,6 +37,13 @@
         </select>
 
         <button onclick="addExpense()">Add Expense</button>
+    </div>
+
+    <!-- OCR SECTION -->
+    <div class="card">
+        <h3>📸 Scan Receipt (OCR)</h3>
+        <input type="file" id="imageInput">
+        <button onclick="scanImage()">Scan Image</button>
     </div>
 
     <h2>Total: ₹<span id="total">0</span></h2>
