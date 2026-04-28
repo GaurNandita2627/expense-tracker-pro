@@ -1,54 +1,50 @@
 let expenses = [];
 
 function addExpense() {
-    let desc = document.getElementById("desc").value.trim();
+    let desc = document.getElementById("desc").value;
     let amount = Number(document.getElementById("amount").value);
     let category = document.getElementById("category").value;
 
-    if (!desc || !amount) {
-        alert("Please fill all fields");
-        return;
-    }
-
-    expenses.push({
-        desc,
-        amount,
-        category
-    });
-
-    document.getElementById("desc").value = "";
-    document.getElementById("amount").value = "";
+    expenses.push({ desc, amount, category });
 
     render();
 }
 
 function render() {
     let list = document.getElementById("list");
-    let totalEl = document.getElementById("total");
+    let total = 0;
 
     list.innerHTML = "";
 
-    let total = 0;
+    let categoryData = {};
 
-    expenses.forEach((exp, index) => {
-        total += exp.amount;
+    expenses.forEach((e, i) => {
+        total += e.amount;
+
+        categoryData[e.category] = (categoryData[e.category] || 0) + e.amount;
 
         list.innerHTML += `
-            <li>
-                ${exp.desc} (${exp.category}) - ₹${exp.amount}
-                <button onclick="deleteExpense(${index})">X</button>
-            </li>
+            <li>${e.desc} - ₹${e.amount}</li>
         `;
     });
 
-    totalEl.innerText = total;
+    document.getElementById("total").innerText = total;
+
+    drawChart(categoryData);
 }
 
-function deleteExpense(index) {
-    expenses.splice(index, 1);
-    render();
-}
+function drawChart(data) {
+    let ctx = document.getElementById("chart").getContext("2d");
 
-function toggleDarkMode() {
-    document.body.classList.toggle("dark");
+    if (window.myChart) window.myChart.destroy();
+
+    window.myChart = new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: Object.keys(data),
+            datasets: [{
+                data: Object.values(data)
+            }]
+        }
+    });
 }
