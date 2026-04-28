@@ -1,6 +1,5 @@
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 
-// Load data on start
 window.onload = function () {
     renderExpenses();
 };
@@ -16,15 +15,13 @@ function addExpense() {
         return;
     }
 
-    let expense = {
+    expenses.push({
         id: Date.now(),
-        desc: desc,
-        amount: amount,
-        category: category,
+        desc,
+        amount,
+        category,
         date: new Date().toLocaleString()
-    };
-
-    expenses.push(expense);
+    });
 
     saveData();
     renderExpenses();
@@ -35,31 +32,35 @@ function addExpense() {
 
 // DELETE EXPENSE
 function deleteExpense(id) {
-    expenses = expenses.filter(exp => exp.id !== id);
+    expenses = expenses.filter(e => e.id !== id);
     saveData();
     renderExpenses();
 }
 
-// SAVE TO LOCALSTORAGE
+// SAVE DATA
 function saveData() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
 }
 
-// RENDER UI (HISTORY + TOTAL)
+// RENDER UI
 function renderExpenses() {
-    const list = document.getElementById("list");
-    const totalEl = document.getElementById("total");
+    let list = document.getElementById("list");
+    let totalEl = document.getElementById("total");
 
     list.innerHTML = "";
 
     let total = 0;
+    let categoryData = {};
 
     expenses.forEach(exp => {
         total += exp.amount;
 
+        categoryData[exp.category] =
+            (categoryData[exp.category] || 0) + exp.amount;
+
         list.innerHTML += `
             <li>
-                <strong>${exp.desc}</strong> (${exp.category}) - ₹${exp.amount}
+                <b>${exp.desc}</b> (${exp.category}) - ₹${exp.amount}
                 <br><small>${exp.date}</small>
                 <button onclick="deleteExpense(${exp.id})">Delete</button>
             </li>
@@ -67,9 +68,30 @@ function renderExpenses() {
     });
 
     totalEl.innerText = total;
+
+    updateChart(categoryData);
 }
 
-// DARK MODE
+// 📊 CHART
+function updateChart(data) {
+    const ctx = document.getElementById("expenseChart").getContext("2d");
+
+    if (window.myChart) {
+        window.myChart.destroy();
+    }
+
+    window.myChart = new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: Object.keys(data),
+            datasets: [{
+                data: Object.values(data)
+            }]
+        }
+    });
+}
+
+// 🌙 DARK MODE
 function toggleDarkMode() {
     document.body.classList.toggle("dark");
 }
