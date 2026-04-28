@@ -1,45 +1,75 @@
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 
+// Load data on start
+window.onload = function () {
+    renderExpenses();
+};
+
+// ADD EXPENSE
 function addExpense() {
-    let desc = document.getElementById("desc").value;
+    let desc = document.getElementById("desc").value.trim();
     let amount = Number(document.getElementById("amount").value);
     let category = document.getElementById("category").value;
 
+    if (!desc || !amount) {
+        alert("Please fill all fields");
+        return;
+    }
+
     let expense = {
         id: Date.now(),
-        desc,
-        amount,
-        category,
+        desc: desc,
+        amount: amount,
+        category: category,
         date: new Date().toLocaleString()
     };
 
     expenses.push(expense);
-    save();
-    render();
+
+    saveData();
+    renderExpenses();
+
+    document.getElementById("desc").value = "";
+    document.getElementById("amount").value = "";
 }
 
-function save() {
+// DELETE EXPENSE
+function deleteExpense(id) {
+    expenses = expenses.filter(exp => exp.id !== id);
+    saveData();
+    renderExpenses();
+}
+
+// SAVE TO LOCALSTORAGE
+function saveData() {
     localStorage.setItem("expenses", JSON.stringify(expenses));
 }
 
-function render() {
-    let list = document.getElementById("list");
-    let total = 0;
+// RENDER UI (HISTORY + TOTAL)
+function renderExpenses() {
+    const list = document.getElementById("list");
+    const totalEl = document.getElementById("total");
 
     list.innerHTML = "";
 
-    expenses.forEach(e => {
-        total += e.amount;
+    let total = 0;
+
+    expenses.forEach(exp => {
+        total += exp.amount;
 
         list.innerHTML += `
             <li>
-                <b>${e.desc}</b> (${e.category}) - ₹${e.amount}
-                <br><small>${e.date}</small>
+                <strong>${exp.desc}</strong> (${exp.category}) - ₹${exp.amount}
+                <br><small>${exp.date}</small>
+                <button onclick="deleteExpense(${exp.id})">Delete</button>
             </li>
         `;
     });
 
-    document.getElementById("total").innerText = total;
+    totalEl.innerText = total;
 }
 
-window.onload = render;
+// DARK MODE
+function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+}
