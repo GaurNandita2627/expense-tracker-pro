@@ -1,13 +1,25 @@
-let expenses = [];
+let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 
 function addExpense() {
     let desc = document.getElementById("desc").value;
     let amount = Number(document.getElementById("amount").value);
     let category = document.getElementById("category").value;
 
-    expenses.push({ desc, amount, category });
+    let expense = {
+        id: Date.now(),
+        desc,
+        amount,
+        category,
+        date: new Date().toLocaleString()
+    };
 
+    expenses.push(expense);
+    save();
     render();
+}
+
+function save() {
+    localStorage.setItem("expenses", JSON.stringify(expenses));
 }
 
 function render() {
@@ -16,35 +28,18 @@ function render() {
 
     list.innerHTML = "";
 
-    let categoryData = {};
-
-    expenses.forEach((e, i) => {
+    expenses.forEach(e => {
         total += e.amount;
 
-        categoryData[e.category] = (categoryData[e.category] || 0) + e.amount;
-
         list.innerHTML += `
-            <li>${e.desc} - ₹${e.amount}</li>
+            <li>
+                <b>${e.desc}</b> (${e.category}) - ₹${e.amount}
+                <br><small>${e.date}</small>
+            </li>
         `;
     });
 
     document.getElementById("total").innerText = total;
-
-    drawChart(categoryData);
 }
 
-function drawChart(data) {
-    let ctx = document.getElementById("chart").getContext("2d");
-
-    if (window.myChart) window.myChart.destroy();
-
-    window.myChart = new Chart(ctx, {
-        type: "pie",
-        data: {
-            labels: Object.keys(data),
-            datasets: [{
-                data: Object.values(data)
-            }]
-        }
-    });
-}
+window.onload = render;
