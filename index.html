@@ -1,8 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker Pro</title>
+
     <link rel="stylesheet" href="style.css">
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -10,7 +15,9 @@
 
 <div class="container">
 
-    <h1>💰 Expense Dashboard</h1>
+    <h1>💰 Expense Tracker Pro</h1>
+
+    <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
 
     <div class="card">
         <input id="desc" placeholder="Expense name">
@@ -20,6 +27,7 @@
             <option>Food 🍔</option>
             <option>Travel 🚗</option>
             <option>Study 📚</option>
+            <option>Other 🧾</option>
         </select>
 
         <button onclick="addExpense()">Add Expense</button>
@@ -27,10 +35,12 @@
 
     <h2>Total: ₹<span id="total">0</span></h2>
 
+    <!-- CHART -->
     <div class="card">
-        <canvas id="chart"></canvas>
+        <canvas id="expenseChart"></canvas>
     </div>
 
+    <!-- HISTORY -->
     <ul id="list"></ul>
 
 </div>
