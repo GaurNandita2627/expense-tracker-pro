@@ -8,15 +8,15 @@ body {
 .container {
     width: 90%;
     max-width: 500px;
-    margin: 30px auto;
+    margin: auto;
+    padding: 20px;
 }
 
 .card {
     background: white;
     padding: 15px;
     margin: 10px 0;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border-radius: 10px;
 }
 
 input, select {
@@ -26,8 +26,8 @@ input, select {
 }
 
 button {
-    width: 95%;
     padding: 10px;
+    width: 95%;
     background: #007bff;
     color: white;
     border: none;
@@ -46,7 +46,7 @@ li {
     border-radius: 8px;
 }
 
-/* DARK MODE */
+/* DARK */
 .dark {
     background: #111;
     color: white;
