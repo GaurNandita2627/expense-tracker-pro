@@ -1,57 +1,75 @@
 let currentUser = "";
-let dataStore = JSON.parse(localStorage.getItem("data")) || {};
+let data = JSON.parse(localStorage.getItem("data")) || {};
 
+// SET USER (FIXED)
 function setUser() {
     let name = document.getElementById("username").value.trim();
-    if (!name) return alert("Enter name");
+
+    if (!name) {
+        alert("Please enter name");
+        return;
+    }
 
     currentUser = name;
 
-    if (!dataStore[currentUser]) {
-        dataStore[currentUser] = [];
+    document.getElementById("activeUser").innerText =
+        "Active User: " + currentUser;
+
+    if (!data[currentUser]) {
+        data[currentUser] = [];
     }
 
     renderExpenses();
 }
 
-function getData() {
-    return dataStore[currentUser] || [];
+// GET USER DATA
+function getExpenses() {
+    return data[currentUser] || [];
 }
 
-function save() {
-    localStorage.setItem("data", JSON.stringify(dataStore));
+// SAVE
+function saveData() {
+    localStorage.setItem("data", JSON.stringify(data));
 }
 
+// ADD EXPENSE
 function addExpense() {
-    if (!currentUser) return alert("Set user first");
+    if (!currentUser) {
+        alert("Set user first");
+        return;
+    }
 
-    let desc = document.getElementById("desc").value;
+    let desc = document.getElementById("desc").value.trim();
     let amount = Number(document.getElementById("amount").value);
     let category = document.getElementById("category").value;
 
-    let arr = getData();
+    if (!desc || !amount) {
+        alert("Fill all fields");
+        return;
+    }
+
+    let arr = getExpenses();
 
     arr.push({
-        id: Date.now(),
         desc,
         amount,
         category,
         date: new Date().toLocaleString()
     });
 
-    dataStore[currentUser] = arr;
+    data[currentUser] = arr;
 
-    save();
+    saveData();
     renderExpenses();
 }
 
-// 🔍 SEARCH LOGIC (MAIN FEATURE)
+// RENDER + SEARCH + TOTAL FIXED
 function renderExpenses() {
     let list = document.getElementById("list");
     let totalEl = document.getElementById("total");
     let search = document.getElementById("search").value.toLowerCase();
 
-    let arr = getData();
+    let arr = getExpenses();
 
     list.innerHTML = "";
 
@@ -60,7 +78,6 @@ function renderExpenses() {
 
     arr.forEach(exp => {
 
-        // FILTER BY NAME
         if (search && !exp.desc.toLowerCase().includes(search)) return;
 
         total += exp.amount;
@@ -81,8 +98,8 @@ function renderExpenses() {
     drawChart(chartData);
 }
 
-// 📊 CHART
-function drawChart(data) {
+// CHART FIXED
+function drawChart(dataObj) {
     let ctx = document.getElementById("chart").getContext("2d");
 
     if (window.myChart) window.myChart.destroy();
@@ -90,9 +107,9 @@ function drawChart(data) {
     window.myChart = new Chart(ctx, {
         type: "pie",
         data: {
-            labels: Object.keys(data),
+            labels: Object.keys(dataObj),
             datasets: [{
-                data: Object.values(data)
+                data: Object.values(dataObj)
             }]
         }
     });
