@@ -1,8 +1,13 @@
-window.onload = function () {
+let currentUser = "";
+let dataStore = JSON.parse(localStorage.getItem("data")) || {};
 
+// =====================
+// LOAD
+// =====================
+window.onload = function () {
     currentUser = localStorage.getItem("currentUser") || "";
 
-    if (currentUser && dataStore[currentUser]) {
+    if (currentUser) {
         document.getElementById("activeUser").innerText =
             "Active User: " + currentUser;
     }
@@ -10,59 +15,41 @@ window.onload = function () {
     renderExpenses();
 };
 
-let currentUser = "";
-let dataStore = JSON.parse(localStorage.getItem("data")) || {};
-
-// SET USER
+// =====================
+// USER FUNCTION
+// =====================
 function setUser() {
     let name = document.getElementById("username").value.trim();
 
-    if (!name) {
-        alert("Enter user name");
-        return;
-    }
+    if (!name) return alert("Enter name");
 
     currentUser = name;
 
-    // create user if not exists
     if (!dataStore[currentUser]) {
         dataStore[currentUser] = [];
     }
 
     localStorage.setItem("currentUser", currentUser);
 
-    document.getElementById("activeUser").innerText =
-        "Active User: " + currentUser;
-
     saveData();
     renderExpenses();
 }
 
-// GET DATA
+// =====================
+// ⭐ STEP 4 HERE (GET DATA)
+// =====================
 function getData() {
+    if (!currentUser) return [];
     return dataStore[currentUser] || [];
 }
 
-// SAVE
-function saveData() {
-    localStorage.setItem("data", JSON.stringify(dataStore));
-}
-
+// =====================
 // ADD EXPENSE
+// =====================
 function addExpense() {
-    if (!currentUser) {
-        alert("Set user first");
-        return;
-    }
-
-    let desc = document.getElementById("desc").value.trim();
+    let desc = document.getElementById("desc").value;
     let amount = Number(document.getElementById("amount").value);
     let category = document.getElementById("category").value;
-
-    if (!desc || !amount) {
-        alert("Fill all fields");
-        return;
-    }
 
     let arr = getData();
 
@@ -78,122 +65,3 @@ function addExpense() {
     saveData();
     renderExpenses();
 }
-
-// RENDER + SEARCH + TOTAL
-function renderExpenses() {
-
-    let list = document.getElementById("list");
-    let totalEl = document.getElementById("total");
-    let search = document.getElementById("search").value.toLowerCase();
-
-    let arr = getData();
-
-    list.innerHTML = "";
-
-    let total = 0;
-    let chartData = {};
-
-    arr.forEach(exp => {
-
-        if (search && !exp.desc.toLowerCase().includes(search)) return;
-
-        total += exp.amount;
-
-        chartData[exp.category] =
-            (chartData[exp.category] || 0) + exp.amount;
-
-        list.innerHTML += `
-            <li>
-                ${exp.desc} - ₹${exp.amount}
-                <br><small>${exp.date}</small>
-            </li>
-        `;
-    });
-
-    totalEl.innerText = total;
-
-    drawChart(chartData);
-}
-
-// CHART
-function drawChart(dataObj) {
-
-    let ctx = document.getElementById("chart").getContext("2d");
-
-    if (window.myChart) window.myChart.destroy();
-
-    window.myChart = new Chart(ctx, {
-        type: "pie",
-        data: {
-            labels: Object.keys(dataObj),
-            datasets: [{
-                data: Object.values(dataObj)
-            }]
-        }
-    });
-}
-
-// ======================
-// OCR FUNCTION
-// ======================
-
-function scanImage() {
-
-    if (!currentUser) {
-        alert("Set user first");
-        return;
-    }
-
-    let file = document.getElementById("imageInput").files[0];
-
-    if (!file) {
-        alert("Select image");
-        return;
-    }
-
-    Tesseract.recognize(file, 'eng')
-    .then(({ data: { text } }) => {
-
-        processOCR(text);
-    });
-}
-
-// PROCESS OCR TEXT
-function processOCR(text) {
-
-    let lines = text.split("\n");
-    let arr = getData();
-
-    let addedTotal = 0;
-
-    lines.forEach(line => {
-
-        line = line.trim();
-
-        let nums = line.match(/\d+(\.\d+)?/g);
-        if (!nums) return;
-
-        let amount = Number(nums[nums.length - 1]);
-
-        let name = line.replace(/\d+(\.\d+)?/g, "").trim();
-        if (!name) name = "Unknown";
-
-        arr.push({
-            desc: name,
-            amount,
-            category: "OCR",
-            date: new Date().toLocaleString()
-        });
-
-        addedTotal += amount;
-    });
-
-    dataStore[currentUser] = arr;
-
-    saveData();
-    renderExpenses();
-
-    // 💥 SHOW OCR TOTAL ON SCREEN (NOT ALERT)
-    document.getElementById("ocrTotal").innerText =
-        "₹" + addedTotal;
-                            }
