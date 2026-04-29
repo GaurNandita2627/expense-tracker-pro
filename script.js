@@ -1,27 +1,14 @@
-// ===============================
-// MULTI USER STORAGE
-// ===============================
 let currentUser = localStorage.getItem("currentUser") || "";
 let allData = JSON.parse(localStorage.getItem("allExpenses")) || {};
 
-// LOAD
 window.onload = function () {
-    if (currentUser && !allData[currentUser]) {
-        allData[currentUser] = [];
-    }
     renderExpenses();
 };
 
-// ===============================
-// USER SELECT
-// ===============================
+// USER SET
 function setUser() {
     let name = document.getElementById("username").value.trim();
-
-    if (!name) {
-        alert("Enter username");
-        return;
-    }
+    if (!name) return alert("Enter name");
 
     currentUser = name;
     localStorage.setItem("currentUser", name);
@@ -33,7 +20,7 @@ function setUser() {
     renderExpenses();
 }
 
-// GET USER DATA
+// GET DATA
 function getExpenses() {
     return allData[currentUser] || [];
 }
@@ -43,27 +30,17 @@ function saveAll() {
     localStorage.setItem("allExpenses", JSON.stringify(allData));
 }
 
-// ===============================
-// ADD EXPENSE
-// ===============================
+// ADD
 function addExpense() {
-    if (!currentUser) {
-        alert("Select user first");
-        return;
-    }
+    if (!currentUser) return alert("Set user first");
 
-    let desc = document.getElementById("desc").value.trim();
+    let desc = document.getElementById("desc").value;
     let amount = Number(document.getElementById("amount").value);
     let category = document.getElementById("category").value;
 
-    if (!desc || !amount) {
-        alert("Fill all fields");
-        return;
-    }
+    let data = getExpenses();
 
-    let expenses = getExpenses();
-
-    expenses.push({
+    data.push({
         id: Date.now(),
         desc,
         amount,
@@ -71,42 +48,31 @@ function addExpense() {
         date: new Date().toLocaleString()
     });
 
-    allData[currentUser] = expenses;
+    allData[currentUser] = data;
 
     saveAll();
     renderExpenses();
-
-    document.getElementById("desc").value = "";
-    document.getElementById("amount").value = "";
 }
 
-// ===============================
 // DELETE
-// ===============================
 function deleteExpense(id) {
-    let updated = getExpenses().filter(e => e.id !== id);
-    allData[currentUser] = updated;
+    let data = getExpenses().filter(e => e.id !== id);
+    allData[currentUser] = data;
 
     saveAll();
     renderExpenses();
 }
 
-// ===============================
-// HELPER: PERSON NAME EXTRACT
-// ===============================
+// NAME EXTRACT
 function getPersonName(desc) {
-    return desc.replace("(OCR)", "").trim().split(" ")[0];
+    return desc.split(" ")[0];
 }
 
-// ===============================
-// RENDER (PERSON FILTER)
-// ===============================
+// RENDER
 function renderExpenses() {
     let list = document.getElementById("list");
     let totalEl = document.getElementById("total");
     let dropdown = document.getElementById("personFilter");
-
-    if (!list || !totalEl || !dropdown) return;
 
     let expenses = getExpenses();
 
@@ -116,15 +82,14 @@ function renderExpenses() {
     let categoryData = {};
     let persons = new Set();
 
-    let selectedPerson = dropdown.value;
+    let selected = dropdown.value;
 
     expenses.forEach(exp => {
 
         let person = getPersonName(exp.desc);
         persons.add(person);
 
-        // FILTER BY PERSON
-        if (selectedPerson && person !== selectedPerson) return;
+        if (selected && person !== selected) return;
 
         total += exp.amount;
 
@@ -133,7 +98,7 @@ function renderExpenses() {
 
         list.innerHTML += `
             <li>
-                <b>${exp.desc}</b> (${exp.category}) - ₹${exp.amount}
+                ${exp.desc} - ₹${exp.amount}
                 <br><small>${exp.date}</small>
                 <button onclick="deleteExpense(${exp.id})">Delete</button>
             </li>
@@ -142,7 +107,6 @@ function renderExpenses() {
 
     totalEl.innerText = total;
 
-    // UPDATE DROPDOWN
     dropdown.innerHTML = `<option value="">All</option>`;
     persons.forEach(p => {
         dropdown.innerHTML += `<option value="${p}">${p}</option>`;
@@ -151,14 +115,9 @@ function renderExpenses() {
     updateChart(categoryData);
 }
 
-// ===============================
 // CHART
-// ===============================
 function updateChart(data) {
-    let canvas = document.getElementById("expenseChart");
-    if (!canvas) return;
-
-    let ctx = canvas.getContext("2d");
+    let ctx = document.getElementById("expenseChart").getContext("2d");
 
     if (window.myChart) window.myChart.destroy();
 
@@ -173,82 +132,40 @@ function updateChart(data) {
     });
 }
 
-// ===============================
 // DARK MODE
-// ===============================
 function toggleDarkMode() {
     document.body.classList.toggle("dark");
 }
 
-// ===============================
-// OCR SCAN
-// ===============================
+// OCR
 function scanImage() {
-    if (!currentUser) {
-        alert("Select user first");
-        return;
-    }
-
     let file = document.getElementById("imageInput").files[0];
-
-    if (!file) {
-        alert("Select image");
-        return;
-    }
 
     Tesseract.recognize(file, 'eng')
     .then(({ data: { text } }) => {
-        processOCRText(text);
-    });
-}
 
-// OCR PROCESS
-function processOCRText(text) {
-    let lines = text.split("\n");
+        let lines = text.split("\n");
+        let data = getExpenses();
 
-    let grouped = {};
-    let grandTotal = 0;
+        lines.forEach(line => {
+            let nums = line.match(/\d+/g);
+            if (!nums) return;
 
-    let expenses = getExpenses();
+            let amount = Number(nums[nums.length - 1]);
+            let name = line.replace(/\d+/g, "").trim();
 
-    lines.forEach(line => {
-        let numbers = line.match(/\d+/g);
-        if (!numbers) return;
-
-        let amount = Number(numbers[numbers.length - 1]);
-
-        let name = line.replace(/\d+/g, "").trim();
-        if (!name) name = "Unknown";
-
-        grouped[name] = (grouped[name] || 0) + amount;
-        grandTotal += amount;
-
-        expenses.push({
-            id: Date.now() + Math.random(),
-            desc: name + " (OCR)",
-            amount,
-            category: "OCR",
-            date: new Date().toLocaleString()
+            data.push({
+                id: Date.now() + Math.random(),
+                desc: name,
+                amount,
+                category: "OCR",
+                date: new Date().toLocaleString()
+            });
         });
+
+        allData[currentUser] = data;
+
+        saveAll();
+        renderExpenses();
     });
-
-    allData[currentUser] = expenses;
-
-    saveAll();
-    renderExpenses();
-
-    showSummary(grouped, grandTotal);
-}
-
-// SUMMARY
-function showSummary(grouped, total) {
-    let msg = "📊 OCR Summary\n\n";
-
-    for (let key in grouped) {
-        msg += `${key} = ₹${grouped[key]}\n`;
-    }
-
-    msg += `\nTOTAL = ₹${total}`;
-
-    alert(msg);
 }
