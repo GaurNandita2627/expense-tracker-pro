@@ -1,3 +1,15 @@
+window.onload = function () {
+
+    currentUser = localStorage.getItem("currentUser") || "";
+
+    if (currentUser && dataStore[currentUser]) {
+        document.getElementById("activeUser").innerText =
+            "Active User: " + currentUser;
+    }
+
+    renderExpenses();
+};
+
 let currentUser = "";
 let dataStore = JSON.parse(localStorage.getItem("data")) || {};
 
