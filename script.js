@@ -207,4 +207,4 @@ function showSummary(grouped, total) {
     msg += `\nTOTAL = ₹${total}`;
 
     alert(msg);
-}
+                       }
