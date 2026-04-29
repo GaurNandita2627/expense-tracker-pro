@@ -1,36 +1,27 @@
-let currentUser = localStorage.getItem("currentUser") || "";
-let allData = JSON.parse(localStorage.getItem("allExpenses")) || {};
+let currentUser = "";
+let dataStore = JSON.parse(localStorage.getItem("data")) || {};
 
-window.onload = function () {
-    renderExpenses();
-};
-
-// USER SET
 function setUser() {
     let name = document.getElementById("username").value.trim();
     if (!name) return alert("Enter name");
 
     currentUser = name;
-    localStorage.setItem("currentUser", name);
 
-    if (!allData[currentUser]) {
-        allData[currentUser] = [];
+    if (!dataStore[currentUser]) {
+        dataStore[currentUser] = [];
     }
 
     renderExpenses();
 }
 
-// GET DATA
-function getExpenses() {
-    return allData[currentUser] || [];
+function getData() {
+    return dataStore[currentUser] || [];
 }
 
-// SAVE
-function saveAll() {
-    localStorage.setItem("allExpenses", JSON.stringify(allData));
+function save() {
+    localStorage.setItem("data", JSON.stringify(dataStore));
 }
 
-// ADD
 function addExpense() {
     if (!currentUser) return alert("Set user first");
 
@@ -38,9 +29,9 @@ function addExpense() {
     let amount = Number(document.getElementById("amount").value);
     let category = document.getElementById("category").value;
 
-    let data = getExpenses();
+    let arr = getData();
 
-    data.push({
+    arr.push({
         id: Date.now(),
         desc,
         amount,
@@ -48,76 +39,51 @@ function addExpense() {
         date: new Date().toLocaleString()
     });
 
-    allData[currentUser] = data;
+    dataStore[currentUser] = arr;
 
-    saveAll();
+    save();
     renderExpenses();
 }
 
-// DELETE
-function deleteExpense(id) {
-    let data = getExpenses().filter(e => e.id !== id);
-    allData[currentUser] = data;
-
-    saveAll();
-    renderExpenses();
-}
-
-// NAME EXTRACT
-function getPersonName(desc) {
-    return desc.split(" ")[0];
-}
-
-// RENDER
+// 🔍 SEARCH LOGIC (MAIN FEATURE)
 function renderExpenses() {
     let list = document.getElementById("list");
     let totalEl = document.getElementById("total");
-    let dropdown = document.getElementById("personFilter");
+    let search = document.getElementById("search").value.toLowerCase();
 
-    let expenses = getExpenses();
+    let arr = getData();
 
     list.innerHTML = "";
 
     let total = 0;
-    let categoryData = {};
-    let persons = new Set();
+    let chartData = {};
 
-    let selected = dropdown.value;
+    arr.forEach(exp => {
 
-    expenses.forEach(exp => {
-
-        let person = getPersonName(exp.desc);
-        persons.add(person);
-
-        if (selected && person !== selected) return;
+        // FILTER BY NAME
+        if (search && !exp.desc.toLowerCase().includes(search)) return;
 
         total += exp.amount;
 
-        categoryData[exp.category] =
-            (categoryData[exp.category] || 0) + exp.amount;
+        chartData[exp.category] =
+            (chartData[exp.category] || 0) + exp.amount;
 
         list.innerHTML += `
             <li>
                 ${exp.desc} - ₹${exp.amount}
                 <br><small>${exp.date}</small>
-                <button onclick="deleteExpense(${exp.id})">Delete</button>
             </li>
         `;
     });
 
     totalEl.innerText = total;
 
-    dropdown.innerHTML = `<option value="">All</option>`;
-    persons.forEach(p => {
-        dropdown.innerHTML += `<option value="${p}">${p}</option>`;
-    });
-
-    updateChart(categoryData);
+    drawChart(chartData);
 }
 
-// CHART
-function updateChart(data) {
-    let ctx = document.getElementById("expenseChart").getContext("2d");
+// 📊 CHART
+function drawChart(data) {
+    let ctx = document.getElementById("chart").getContext("2d");
 
     if (window.myChart) window.myChart.destroy();
 
@@ -129,43 +95,5 @@ function updateChart(data) {
                 data: Object.values(data)
             }]
         }
-    });
-}
-
-// DARK MODE
-function toggleDarkMode() {
-    document.body.classList.toggle("dark");
-}
-
-// OCR
-function scanImage() {
-    let file = document.getElementById("imageInput").files[0];
-
-    Tesseract.recognize(file, 'eng')
-    .then(({ data: { text } }) => {
-
-        let lines = text.split("\n");
-        let data = getExpenses();
-
-        lines.forEach(line => {
-            let nums = line.match(/\d+/g);
-            if (!nums) return;
-
-            let amount = Number(nums[nums.length - 1]);
-            let name = line.replace(/\d+/g, "").trim();
-
-            data.push({
-                id: Date.now() + Math.random(),
-                desc: name,
-                amount,
-                category: "OCR",
-                date: new Date().toLocaleString()
-            });
-        });
-
-        allData[currentUser] = data;
-
-        saveAll();
-        renderExpenses();
     });
 }
