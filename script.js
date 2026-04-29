@@ -148,22 +148,33 @@ function processOCR(text) {
     let lines = text.split("\n");
     let arr = getData();
 
+    let addedTotal = 0;
+
     lines.forEach(line => {
 
-        let nums = line.match(/\d+/g);
+        // clean line
+        line = line.trim();
+
+        // extract numbers safely
+        let nums = line.match(/\d+(\.\d+)?/g);
         if (!nums) return;
 
         let amount = Number(nums[nums.length - 1]);
-        let name = line.replace(/\d+/g, "").trim();
+
+        // remove numbers to get name
+        let name = line.replace(/\d+(\.\d+)?/g, "").trim();
 
         if (!name) name = "Unknown";
 
+        // add to data
         arr.push({
             desc: name,
-            amount,
+            amount: amount,
             category: "OCR",
             date: new Date().toLocaleString()
         });
+
+        addedTotal += amount;
     });
 
     dataStore[currentUser] = arr;
@@ -171,5 +182,6 @@ function processOCR(text) {
     saveData();
     renderExpenses();
 
-    alert("OCR Done ✅");
+    // 💥 SHOW OCR TOTAL PROPERLY
+    alert(`OCR Done ✅\nTotal Added = ₹${addedTotal}`);
 }
