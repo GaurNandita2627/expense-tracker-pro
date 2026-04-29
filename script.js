@@ -1,12 +1,12 @@
 let currentUser = "";
-let data = JSON.parse(localStorage.getItem("data")) || {};
+let dataStore = JSON.parse(localStorage.getItem("data")) || {};
 
-// SET USER (FIXED)
+// SET USER
 function setUser() {
     let name = document.getElementById("username").value.trim();
 
     if (!name) {
-        alert("Please enter name");
+        alert("Enter user name");
         return;
     }
 
@@ -15,21 +15,21 @@ function setUser() {
     document.getElementById("activeUser").innerText =
         "Active User: " + currentUser;
 
-    if (!data[currentUser]) {
-        data[currentUser] = [];
+    if (!dataStore[currentUser]) {
+        dataStore[currentUser] = [];
     }
 
     renderExpenses();
 }
 
-// GET USER DATA
-function getExpenses() {
-    return data[currentUser] || [];
+// GET DATA
+function getData() {
+    return dataStore[currentUser] || [];
 }
 
 // SAVE
 function saveData() {
-    localStorage.setItem("data", JSON.stringify(data));
+    localStorage.setItem("data", JSON.stringify(dataStore));
 }
 
 // ADD EXPENSE
@@ -48,7 +48,7 @@ function addExpense() {
         return;
     }
 
-    let arr = getExpenses();
+    let arr = getData();
 
     arr.push({
         desc,
@@ -57,19 +57,20 @@ function addExpense() {
         date: new Date().toLocaleString()
     });
 
-    data[currentUser] = arr;
+    dataStore[currentUser] = arr;
 
     saveData();
     renderExpenses();
 }
 
-// RENDER + SEARCH + TOTAL FIXED
+// RENDER + SEARCH + TOTAL
 function renderExpenses() {
+
     let list = document.getElementById("list");
     let totalEl = document.getElementById("total");
     let search = document.getElementById("search").value.toLowerCase();
 
-    let arr = getExpenses();
+    let arr = getData();
 
     list.innerHTML = "";
 
@@ -98,8 +99,9 @@ function renderExpenses() {
     drawChart(chartData);
 }
 
-// CHART FIXED
+// CHART
 function drawChart(dataObj) {
+
     let ctx = document.getElementById("chart").getContext("2d");
 
     if (window.myChart) window.myChart.destroy();
@@ -113,4 +115,61 @@ function drawChart(dataObj) {
             }]
         }
     });
+}
+
+// ======================
+// OCR FUNCTION
+// ======================
+
+function scanImage() {
+
+    if (!currentUser) {
+        alert("Set user first");
+        return;
+    }
+
+    let file = document.getElementById("imageInput").files[0];
+
+    if (!file) {
+        alert("Select image");
+        return;
+    }
+
+    Tesseract.recognize(file, 'eng')
+    .then(({ data: { text } }) => {
+
+        processOCR(text);
+    });
+}
+
+// PROCESS OCR TEXT
+function processOCR(text) {
+
+    let lines = text.split("\n");
+    let arr = getData();
+
+    lines.forEach(line => {
+
+        let nums = line.match(/\d+/g);
+        if (!nums) return;
+
+        let amount = Number(nums[nums.length - 1]);
+        let name = line.replace(/\d+/g, "").trim();
+
+        if (!name) name = "Unknown";
+
+        arr.push({
+            desc: name,
+            amount,
+            category: "OCR",
+            date: new Date().toLocaleString()
+        });
+    });
+
+    dataStore[currentUser] = arr;
+
+    saveData();
+    renderExpenses();
+
+    alert("OCR Done ✅");
 }
