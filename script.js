@@ -1,3 +1,6 @@
+// ===============================
+// MULTI USER STORAGE
+// ===============================
 let currentUser = localStorage.getItem("currentUser") || "";
 let allData = JSON.parse(localStorage.getItem("allExpenses")) || {};
 
@@ -9,7 +12,9 @@ window.onload = function () {
     renderExpenses();
 };
 
-// SET USER
+// ===============================
+// USER SELECT
+// ===============================
 function setUser() {
     let name = document.getElementById("username").value.trim();
 
@@ -38,7 +43,9 @@ function saveAll() {
     localStorage.setItem("allExpenses", JSON.stringify(allData));
 }
 
+// ===============================
 // ADD EXPENSE
+// ===============================
 function addExpense() {
     if (!currentUser) {
         alert("Select user first");
@@ -49,7 +56,10 @@ function addExpense() {
     let amount = Number(document.getElementById("amount").value);
     let category = document.getElementById("category").value;
 
-    if (!desc || !amount) return;
+    if (!desc || !amount) {
+        alert("Fill all fields");
+        return;
+    }
 
     let expenses = getExpenses();
 
@@ -65,9 +75,14 @@ function addExpense() {
 
     saveAll();
     renderExpenses();
+
+    document.getElementById("desc").value = "";
+    document.getElementById("amount").value = "";
 }
 
+// ===============================
 // DELETE
+// ===============================
 function deleteExpense(id) {
     let updated = getExpenses().filter(e => e.id !== id);
     allData[currentUser] = updated;
@@ -76,12 +91,22 @@ function deleteExpense(id) {
     renderExpenses();
 }
 
-// RENDER (USER-WISE)
+// ===============================
+// HELPER: PERSON NAME EXTRACT
+// ===============================
+function getPersonName(desc) {
+    return desc.replace("(OCR)", "").trim().split(" ")[0];
+}
+
+// ===============================
+// RENDER (PERSON FILTER)
+// ===============================
 function renderExpenses() {
     let list = document.getElementById("list");
     let totalEl = document.getElementById("total");
+    let dropdown = document.getElementById("personFilter");
 
-    if (!list || !totalEl) return;
+    if (!list || !totalEl || !dropdown) return;
 
     let expenses = getExpenses();
 
@@ -89,8 +114,18 @@ function renderExpenses() {
 
     let total = 0;
     let categoryData = {};
+    let persons = new Set();
+
+    let selectedPerson = dropdown.value;
 
     expenses.forEach(exp => {
+
+        let person = getPersonName(exp.desc);
+        persons.add(person);
+
+        // FILTER BY PERSON
+        if (selectedPerson && person !== selectedPerson) return;
+
         total += exp.amount;
 
         categoryData[exp.category] =
@@ -107,10 +142,18 @@ function renderExpenses() {
 
     totalEl.innerText = total;
 
+    // UPDATE DROPDOWN
+    dropdown.innerHTML = `<option value="">All</option>`;
+    persons.forEach(p => {
+        dropdown.innerHTML += `<option value="${p}">${p}</option>`;
+    });
+
     updateChart(categoryData);
 }
 
+// ===============================
 // CHART
+// ===============================
 function updateChart(data) {
     let canvas = document.getElementById("expenseChart");
     if (!canvas) return;
@@ -130,15 +173,16 @@ function updateChart(data) {
     });
 }
 
+// ===============================
 // DARK MODE
+// ===============================
 function toggleDarkMode() {
     document.body.classList.toggle("dark");
 }
 
-/* ======================
-   📸 OCR WITH GROUPING
-====================== */
-
+// ===============================
+// OCR SCAN
+// ===============================
 function scanImage() {
     if (!currentUser) {
         alert("Select user first");
@@ -207,4 +251,4 @@ function showSummary(grouped, total) {
     msg += `\nTOTAL = ₹${total}`;
 
     alert(msg);
-                       }
+}
