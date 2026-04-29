@@ -6,7 +6,12 @@
 <title>Expense Tracker Pro</title>
 
 <link rel="stylesheet" href="style.css">
+
+<!-- Chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- OCR -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 
 <body>
@@ -42,6 +47,13 @@
         <button onclick="addExpense()">Add Expense</button>
     </div>
 
+    <!-- OCR -->
+    <div class="card">
+        <h3>📸 OCR Scan</h3>
+        <input type="file" id="imageInput">
+        <button onclick="scanImage()">Scan Image</button>
+    </div>
+
     <h2>Total: ₹<span id="total">0</span></h2>
 
     <!-- CHART -->
@@ -49,7 +61,7 @@
         <canvas id="chart"></canvas>
     </div>
 
-    <!-- LIST -->
+    <!-- HISTORY -->
     <ul id="list"></ul>
 
 </div>
