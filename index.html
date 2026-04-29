@@ -6,32 +6,30 @@
 <title>Expense Tracker Pro</title>
 
 <link rel="stylesheet" href="style.css">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-<div class="bg"></div>
-
 <div class="container">
 
-    <h1>💰 Expense Tracker</h1>
+    <h1>💰 Expense Tracker Pro</h1>
 
     <!-- USER -->
-    <div class="card glass">
+    <div class="card">
         <input id="username" placeholder="Enter user name">
         <button onclick="setUser()">Set User</button>
+        <p id="activeUser">No user selected</p>
     </div>
 
     <!-- SEARCH -->
-    <div class="card glass">
+    <div class="card">
         <input id="search" placeholder="Search name (e.g. Nandita)" oninput="renderExpenses()">
     </div>
 
     <!-- ADD -->
-    <div class="card glass">
-        <input id="desc" placeholder="Expense (e.g. Nandita Dress)">
+    <div class="card">
+        <input id="desc" placeholder="Expense name (e.g. Nandita Dress)">
         <input id="amount" type="number" placeholder="Amount">
 
         <select id="category">
@@ -47,10 +45,11 @@
     <h2>Total: ₹<span id="total">0</span></h2>
 
     <!-- CHART -->
-    <div class="card glass">
+    <div class="card">
         <canvas id="chart"></canvas>
     </div>
 
+    <!-- LIST -->
     <ul id="list"></ul>
 
 </div>
