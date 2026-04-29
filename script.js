@@ -152,24 +152,19 @@ function processOCR(text) {
 
     lines.forEach(line => {
 
-        // clean line
         line = line.trim();
 
-        // extract numbers safely
         let nums = line.match(/\d+(\.\d+)?/g);
         if (!nums) return;
 
         let amount = Number(nums[nums.length - 1]);
 
-        // remove numbers to get name
         let name = line.replace(/\d+(\.\d+)?/g, "").trim();
-
         if (!name) name = "Unknown";
 
-        // add to data
         arr.push({
             desc: name,
-            amount: amount,
+            amount,
             category: "OCR",
             date: new Date().toLocaleString()
         });
@@ -182,6 +177,7 @@ function processOCR(text) {
     saveData();
     renderExpenses();
 
-    // 💥 SHOW OCR TOTAL PROPERLY
-    alert(`OCR Done ✅\nTotal Added = ₹${addedTotal}`);
-}
+    // 💥 SHOW OCR TOTAL ON SCREEN (NOT ALERT)
+    document.getElementById("ocrTotal").innerText =
+        "₹" + addedTotal;
+                            }
