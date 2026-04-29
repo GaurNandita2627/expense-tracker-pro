@@ -12,13 +12,17 @@ function setUser() {
 
     currentUser = name;
 
-    document.getElementById("activeUser").innerText =
-        "Active User: " + currentUser;
-
+    // create user if not exists
     if (!dataStore[currentUser]) {
         dataStore[currentUser] = [];
     }
 
+    localStorage.setItem("currentUser", currentUser);
+
+    document.getElementById("activeUser").innerText =
+        "Active User: " + currentUser;
+
+    saveData();
     renderExpenses();
 }
 
